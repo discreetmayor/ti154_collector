@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <libgen.h>
+#include <inttypes.h>
 
 #include "mac_util.h"
 #include "api_mac.h"
@@ -65,7 +66,8 @@
                               Smsgs_dataFields_lightSensor | \
                               Smsgs_dataFields_humiditySensor | \
                               Smsgs_dataFields_msgStats | \
-                              Smsgs_dataFields_configSettings)
+                              Smsgs_dataFields_configSettings | \
+			      Smsgs_dataFields_custom)
 
 /* Delay for config request retry in busy network */
 #define CONFIG_DELAY 2000
@@ -583,6 +585,36 @@ Collector_status_t Collector_sendToggleLedRequest(ApiMac_sAddr_t *pDstAddr)
     }
 
     return(status);
+}
+
+Collector_status_t Collector_sendCustomCommand(ApiMac_sAddr_t *pDstAddr, uint8_t *state, uint16_t length) {
+       	Collector_status_t status = Collector_status_invalid_state;
+    	if(cllcState >= Cllc_states_started)
+    	{
+        	Llc_deviceListItem_t item;
+
+        	if(Csf_getDevice(pDstAddr, &item))
+        	{
+            		uint8_t buffer[length+sizeof(uint8_t)];
+            		uint8_t *pBuf = buffer;
+            		*pBuf = (uint8_t)Smsgs_cmdIds_customCommand;
+           		int i = 0;
+           		for(i = 0; i < length; i++ ) {
+               			pBuf[i+1] = *(state+i);
+           		}
+
+            		sendMsg(Smsgs_cmdIds_customCommand, item.devInfo.shortAddress,
+                    		item.capInfo.rxOnWhenIdle,
+                    		length+1,
+                    		buffer);
+            		status = Collector_status_success;
+        	}
+        	else
+        	{
+            		status = Collector_status_deviceNotFound;
+        	}
+    	}
+    	return(status);
 }
 
 /*!
@@ -1491,24 +1523,8 @@ static void processSensorData(ApiMac_mcpsDataInd_t *pDataInd)
     /* Parse data in order of frameControl mask, starting with LSB */
     if(sensorData.frameControl & Smsgs_dataFields_tempSensor)
     {
-        sensorData.tempSensor.ambienceTemp = Util_buildUint16(pBuf[0], pBuf[1]);
-        pBuf += 2;
-        sensorData.tempSensor.objectTemp = Util_buildUint16(pBuf[0], pBuf[1]);
-        pBuf += 2;
-    }
-
-    if(sensorData.frameControl & Smsgs_dataFields_lightSensor)
-    {
-        sensorData.lightSensor.rawData = Util_buildUint16(pBuf[0], pBuf[1]);
-        pBuf += 2;
-    }
-
-    if(sensorData.frameControl & Smsgs_dataFields_humiditySensor)
-    {
-        sensorData.humiditySensor.temp = Util_buildUint16(pBuf[0], pBuf[1]);
-        pBuf += 2;
-        sensorData.humiditySensor.humidity = Util_buildUint16(pBuf[0], pBuf[1]);
-        pBuf += 2;
+	sensorData.tempSensor.temp = Util_buildUint16(pBuf[0], pBuf[1]);
+	pBuf += 2;
     }
 
     if(sensorData.frameControl & Smsgs_dataFields_msgStats)

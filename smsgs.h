@@ -223,8 +223,8 @@ The <b>Sensor Ramp Data Message</b> is defined as:
     /* Device type request msg */
     Smsgs_cmdIds_DeviceTypeReq = 16,
     /* Device type response msg */
-    Smsgs_cmdIds_DeviceTypeRsp = 17
-
+    Smsgs_cmdIds_DeviceTypeRsp = 17,
+    Smsgs_cmdIds_customCommand = 19
  } Smsgs_cmdIds_t;
 
 /*!
@@ -252,6 +252,7 @@ typedef enum
     Smsgs_dataFields_accelSensor = 0x0040,
 #endif /* LPSTK */
     Smsgs_dataFields_bleSensor = 0x0080,
+    Smsgs_dataFields_custom = 0x0100
 } Smsgs_dataFields_t;
 
 /*!
@@ -367,21 +368,23 @@ typedef struct _Smsgs_identifyledrspmsg_t
     uint8_t status;
 } Smsgs_identifyLedRspMsg_t;
 
+typedef struct _Smsgs_customfield_t
+{
+    uint8_t type;
+    uint8_t *state;
+    uint16_t length;
+} Smsgs_customField_t;
+
 /*!
  Temp Sensor Field
  */
 typedef struct _Smsgs_tempsensorfield_t
 {
     /*!
-     Ambience Chip Temperature - each value represents a 0.01 C
-     degree, so a value of 2475 represents 24.75 C.
-     */
-    int16_t ambienceTemp;
-    /*!
      Object Temperature - each value represents a 0.01 C
      degree, so a value of 2475 represents 24.75 C.
      */
-    int16_t objectTemp;
+    int16_t temp;
 } Smsgs_tempSensorField_t;
 
 /*!
@@ -604,6 +607,7 @@ typedef struct _Smsgs_sensormsg_t
      is set in frameControl.
      */
     Smsgs_bleSensorField_t bleSensor;
+    Smsgs_customField_t custom;
 } Smsgs_sensorMsg_t;
 
 /*!

@@ -223,6 +223,12 @@ extern void Collector_updateStats( void );
 extern Collector_status_t Collector_sendToggleLedRequest(
                 ApiMac_sAddr_t *pDstAddr);
 
+
+extern Collector_status_t Collector_sendCustomCommand(
+                ApiMac_sAddr_t *pDstAddr,
+                uint8_t *payload,
+               uint16_t length);
+
 /*!
  * @brief Build and send the device type request message to a device.
  *

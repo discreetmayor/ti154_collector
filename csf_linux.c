@@ -1023,7 +1023,7 @@ void Csf_deviceSensorDataUpdate(ApiMac_sAddr_t *pSrcAddr, int8_t rssi,
                                 Smsgs_sensorMsg_t *pMsg)
 {
 #ifndef IS_HEADLESS
-    uint16_t sensorData = pMsg->tempSensor.ambienceTemp;
+    uint16_t sensorData = pMsg->tempSensor.temp;
 
     if((DisplayLine_sensorStart + (pSrcAddr->addr.shortAddr - 1)) < DisplayLine_sensorEnd)
     {
@@ -2907,6 +2907,13 @@ extern uint8_t Csf_sendToggleLedRequest(
     return Collector_sendToggleLedRequest(pDstAddr);
 }
 
+extern uint8_t Csf_customCommand(
+                ApiMac_sAddr_t *pDstAddr,
+                uint8_t *state,
+                uint16_t length)
+{
+	return Collector_sendCustomCommand(pDstAddr, state, length);
+}
 /*
  * Public function in csf_linux.h
  * Gateway front end uses this to get the current state.

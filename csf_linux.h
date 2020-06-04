@@ -157,6 +157,10 @@ extern uint8_t Csf_sendConfigRequest( ApiMac_sAddr_t *pDstAddr,
 extern uint8_t Csf_sendToggleLedRequest(
                 ApiMac_sAddr_t *pDstAddr);
 
+extern uint8_t Csf_customCommand(
+                ApiMac_sAddr_t *pDstAddr,
+                uint8_t *state,
+                uint16_t length);
 /*!
  * @brief       The application calls this function to indicate that a device
  *              disassociated.
