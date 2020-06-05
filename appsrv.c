@@ -298,11 +298,16 @@ static void appsrv_processTxDataReq(struct appsrv_connection *pCONN,
         LOG_printf(LOG_APPSRV_MSG_CONTENT, " Config-req sent\n");
         LOG_printf(LOG_APPSRV_MSG_CONTENT, "Config status: %x\n", configStatus);
     }
-
-    else if (msgId == Smsgs_cmdIds_toggleLedReq)
+    else if (msgId == Smsgs_cmdIds_customCommand)
     {
-        LOG_printf(LOG_APPSRV_MSG_CONTENT, " Toggle-req received\n");
-        Csf_sendToggleLedRequest(&pDstAddr);
+        uint16_t length = ((pIncomingMsg->iobuf[ind]) |
+                (pIncomingMsg->iobuf[ind + 1] << 8)) + sizeof(uint16_t);
+        uint8_t *state = Csf_malloc(128); // fixme
+        int i = 0;
+        for(i=0; i < length; i++ ) {
+        	*(state+i) = pIncomingMsg->iobuf[ind+i];
+	}
+        Csf_customCommand(&pDstAddr, state, length);
     }
 
     status = ApiMac_status_success;
